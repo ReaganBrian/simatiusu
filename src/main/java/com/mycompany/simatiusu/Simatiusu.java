@@ -11,6 +11,6 @@ package com.mycompany.simatiusu;
 public class Simatiusu {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println("Simati usu");
     }
 }
