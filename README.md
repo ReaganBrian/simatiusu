@@ -36,12 +36,24 @@ Or manually execute the SQL commands in `database_schema.sql`.
 
 ### 2. Database Configuration
 
-Edit `src/main/java/loginandsignup/DatabaseConnection.java` to configure your database connection:
+You can configure the database connection in two ways:
+
+**Option 1: Using System Properties (Recommended for production)**
+```bash
+mvn exec:java -Dexec.mainClass="loginandsignup.LoginAndSignUp" \
+  -Ddb.url="jdbc:mysql://localhost:3306/simatiusu_db" \
+  -Ddb.user="root" \
+  -Ddb.password="your_password"
+```
+
+**Option 2: Edit the source code (For development)**
+
+Edit `src/main/java/loginandsignup/DatabaseConnection.java` to set default values:
 
 ```java
-private static final String URL = "jdbc:mysql://localhost:3306/simatiusu_db";
-private static final String USER = "root";
-private static final String PASSWORD = "your_password";
+private static final String URL = System.getProperty("db.url", "jdbc:mysql://localhost:3306/simatiusu_db");
+private static final String USER = System.getProperty("db.user", "root");
+private static final String PASSWORD = System.getProperty("db.password", "your_password");
 ```
 
 ### 3. Build the Project

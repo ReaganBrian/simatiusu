@@ -2,14 +2,19 @@ package loginandsignup;
 
 import java.sql.*;
 import org.mindrot.jbcrypt.BCrypt;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Database connection and operations for user management
  */
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/simatiusu_db";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private static final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
+    
+    // TODO: Move these to a configuration file or environment variables for production
+    private static final String URL = System.getProperty("db.url", "jdbc:mysql://localhost:3306/simatiusu_db");
+    private static final String USER = System.getProperty("db.user", "root");
+    private static final String PASSWORD = System.getProperty("db.password", "");
 
     /**
      * Get database connection
@@ -46,7 +51,7 @@ public class DatabaseConnection {
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error registering user: " + user.getUsername(), e);
             return false;
         }
     }
@@ -76,14 +81,14 @@ public class DatabaseConnection {
                     user.setFullName(rs.getString("full_name"));
                     user.setEmail(rs.getString("email"));
                     user.setUsername(rs.getString("username"));
-                    user.setPassword(storedHash);
+                    // Don't store password hash in the user object for security
                     user.setCreatedAt(rs.getTimestamp("created_at"));
                     return user;
                 }
             }
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error validating login for user: " + username, e);
         }
         
         return null;
@@ -106,7 +111,7 @@ public class DatabaseConnection {
             }
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error checking if username exists: " + username, e);
         }
         
         return false;
@@ -129,7 +134,7 @@ public class DatabaseConnection {
             }
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error checking if email exists: " + email, e);
         }
         
         return false;
