@@ -7,7 +7,21 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>24</maven.compiler.release>
-        <exec.mainClass>com.mycompany.simatiusu.Simatiusu</exec.mainClass>
+        <maven.compiler.release>17</maven.compiler.release>
+        <exec.mainClass>loginandsignup.LoginAndSignUp</exec.mainClass>
     </properties>
+    <dependencies>
+        <!-- MySQL Connector -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+        <!-- BCrypt for password hashing -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+    </dependencies>
 </project>
