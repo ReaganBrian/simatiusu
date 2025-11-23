@@ -114,7 +114,7 @@ public class Login extends javax.swing.JFrame {
         btnRegister.setBackground(new java.awt.Color(0, 0, 0));
         btnRegister.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         btnRegister.setForeground(new java.awt.Color(255, 255, 255));
-        btnRegister.setText("Sign Up");
+        btnRegister.setText("Register");
         btnRegister.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRegisterActionPerformed(evt);
