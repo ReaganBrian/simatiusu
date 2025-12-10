@@ -285,6 +285,188 @@ public class DashboardAdmin extends JFrame {
         }
     }
     
+    /**
+     * Hitung total peminjaman pending
+     */
+    private int countPendingBookings() {
+        List<Booking> bookings = bookingService.getPendingBookings();
+        return bookings != null ? bookings.size() : 0;
+    }
+    
+    /**
+     * Hitung total peminjaman yang disetujui
+     */
+    private int countApprovedBookings() {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        int count = 0;
+        for (Booking b : allBookings) {
+            if ("APPROVED".equals(b.getStatus())) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Hitung total peminjaman yang ditolak
+     */
+    private int countRejectedBookings() {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        int count = 0;
+        for (Booking b : allBookings) {
+            if ("REJECTED".equals(b.getStatus())) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Export data peminjaman ke format text
+     */
+    private String exportBookingData(Booking booking) {
+        if (booking == null) {
+            return "";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(booking.getId()).append("\n");
+        sb.append("Peminjam: ").append(booking.getNamaPeminjam()).append("\n");
+        sb.append("NIDN/NIM: ").append(booking.getNidnOrNim()).append("\n");
+        sb.append("Ruangan: ").append(booking.getKodeRuang()).append("\n");
+        sb.append("Mata Kuliah: ").append(booking.getMataKuliah()).append("\n");
+        sb.append("Dosen: ").append(booking.getNamaDosen()).append("\n");
+        sb.append("Tanggal: ").append(booking.getTanggal()).append("\n");
+        sb.append("Waktu: ").append(booking.getJamMulai()).append(" - ").append(booking.getJamSelesai()).append("\n");
+        sb.append("Status: ").append(booking.getStatus()).append("\n");
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Validasi booking sebelum approve
+     */
+    private boolean validateBookingForApproval(int bookingId) {
+        if (bookingId <= 0) {
+            return false;
+        }
+        
+        List<Booking> bookings = bookingService.getPendingBookings();
+        for (Booking b : bookings) {
+            if (b.getId() == bookingId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Refresh table data
+     */
+    private void refreshTables() {
+        SwingUtilities.invokeLater(() -> {
+            loadData();
+        });
+    }
+    
+    /**
+     * Filter booking by status
+     */
+    private List<Booking> filterBookingsByStatus(String status) {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        List<Booking> filtered = new java.util.ArrayList<>();
+        
+        for (Booking b : allBookings) {
+            if (status.equals(b.getStatus())) {
+                filtered.add(b);
+            }
+        }
+        return filtered;
+    }
+    
+    /**
+     * Search booking by keyword
+     */
+    private List<Booking> searchBookings(String keyword) {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        List<Booking> results = new java.util.ArrayList<>();
+        
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return allBookings;
+        }
+        
+        String lowerKeyword = keyword.toLowerCase();
+        for (Booking b : allBookings) {
+            if (b.getNamaPeminjam().toLowerCase().contains(lowerKeyword) ||
+                b.getNidnOrNim().toLowerCase().contains(lowerKeyword) ||
+                b.getKodeRuang().toLowerCase().contains(lowerKeyword) ||
+                b.getMataKuliah().toLowerCase().contains(lowerKeyword) ||
+                b.getNamaDosen().toLowerCase().contains(lowerKeyword)) {
+                results.add(b);
+            }
+        }
+        return results;
+    }
+    
+    /**
+     * Format status untuk display
+     */
+    private String formatStatusDisplay(String status) {
+        if (status == null) {
+            return "N/A";
+        }
+        
+        switch (status) {
+            case "PENDING":
+                return "Menunggu Persetujuan";
+            case "APPROVED":
+                return "Disetujui";
+            case "REJECTED":
+                return "Ditolak";
+            case "COMPLETED":
+                return "Selesai";
+            default:
+                return status;
+        }
+    }
+    
+    /**
+     * Stop semua background task
+     */
+    private void stopBackgroundTasks() {
+        if (refreshTimer != null && refreshTimer.isRunning()) {
+            refreshTimer.stop();
+        }
+    }
+    
+    /**
+     * Resume background task
+     */
+    private void resumeBackgroundTasks() {
+        if (refreshTimer != null && !refreshTimer.isRunning()) {
+            refreshTimer.start();
+        }
+    }
+    
+    /**
+     * Get booking detail by ID
+     */
+    private Booking getBookingById(int bookingId) {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        for (Booking b : allBookings) {
+            if (b.getId() == bookingId) {
+                return b;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public void dispose() {
+        stopBackgroundTasks();
+        super.dispose();
+    }
+    
     // Button Renderer for table
     class ButtonRenderer extends JPanel implements javax.swing.table.TableCellRenderer {
         private JButton btnApprove;
