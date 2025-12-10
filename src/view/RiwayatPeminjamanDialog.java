@@ -255,4 +255,168 @@ public class RiwayatPeminjamanDialog extends JDialog {
             tableModel.addRow(row);
         }
     }
+    
+    /**
+     * Validate data before display
+     */
+    private boolean validateBookingData(Booking booking) {
+        if (booking == null) {
+            return false;
+        }
+        
+        return booking.getKodeRuang() != null && 
+               booking.getTanggal() != null && 
+               booking.getJamMulai() != null && 
+               booking.getJamSelesai() != null;
+    }
+    
+    /**
+     * Handle empty data display
+     */
+    private void handleEmptyData() {
+        tableModel.setRowCount(0);
+        Object[] emptyRow = {
+            "-",
+            "Tidak ada data",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-"
+        };
+        tableModel.addRow(emptyRow);
+    }
+    
+    /**
+     * Handle load data error
+     */
+    private void handleLoadError(Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Terjadi kesalahan saat memuat data: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+    
+    /**
+     * Format status text for display
+     */
+    private String formatStatusText(String status) {
+        if (status == null) {
+            return "UNKNOWN";
+        }
+        
+        switch (status.toUpperCase()) {
+            case "MENUNGGU":
+            case "PENDING":
+                return "MENUNGGU";
+            case "DISETUJUI":
+            case "APPROVED":
+                return "DISETUJUI";
+            case "DITOLAK":
+            case "REJECTED":
+                return "DITOLAK";
+            default:
+                return status.toUpperCase();
+        }
+    }
+    
+    /**
+     * Export data to string
+     */
+    private String exportToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Riwayat Peminjaman - ").append(currentUser.getNamaLengkap()).append("\n");
+        sb.append("=".repeat(80)).append("\n\n");
+        
+        List<Booking> bookings = bookingService.getUserBookings(currentUser.getId());
+        
+        for (int i = 0; i < bookings.size(); i++) {
+            Booking b = bookings.get(i);
+            sb.append(String.format("%d. Ruangan: %s\n", i + 1, b.getKodeRuang()));
+            sb.append(String.format("   Tanggal: %s\n", dateFormat.format(b.getTanggal())));
+            sb.append(String.format("   Waktu: %s - %s\n", 
+                b.getJamMulai().toString().substring(0, 5),
+                b.getJamSelesai().toString().substring(0, 5)));
+            sb.append(String.format("   Dosen: %s\n", b.getNamaDosen()));
+            sb.append(String.format("   Mata Kuliah: %s\n", b.getMataKuliah()));
+            sb.append(String.format("   Status: %s\n\n", b.getStatus()));
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Count bookings by status
+     */
+    private int countByStatus(String status) {
+        List<Booking> bookings = bookingService.getUserBookings(currentUser.getId());
+        int count = 0;
+        
+        for (Booking b : bookings) {
+            if (status.equals(b.getStatus())) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Get statistics summary
+     */
+    private String getStatisticsSummary() {
+        int total = bookingService.getUserBookings(currentUser.getId()).size();
+        int pending = countByStatus("MENUNGGU");
+        int approved = countByStatus("DISETUJUI");
+        int rejected = countByStatus("DITOLAK");
+        
+        return String.format("Total: %d | Menunggu: %d | Disetujui: %d | Ditolak: %d",
+            total, pending, approved, rejected);
+    }
+    
+    /**
+     * Filter bookings by status
+     */
+    private void filterByStatus(String status) {
+        tableModel.setRowCount(0);
+        List<Booking> bookings = bookingService.getUserBookings(currentUser.getId());
+        
+        int no = 1;
+        for (Booking booking : bookings) {
+            if (status == null || status.isEmpty() || status.equals(booking.getStatus())) {
+                String tanggal = dateFormat.format(booking.getTanggal());
+                String jam = String.format("%s - %s",
+                    booking.getJamMulai().toString().substring(0, 5),
+                    booking.getJamSelesai().toString().substring(0, 5));
+                
+                Object[] row = {
+                    no++,
+                    booking.getKodeRuang(),
+                    tanggal,
+                    jam,
+                    booking.getNamaDosen(),
+                    booking.getMataKuliah(),
+                    booking.getStatus()
+                };
+                
+                tableModel.addRow(row);
+            }
+        }
+    }
+    
+    /**
+     * Check if table has data
+     */
+    private boolean hasData() {
+        return tableModel.getRowCount() > 0;
+    }
+    
+    /**
+     * Refresh table display
+     */
+    private void refreshTable() {
+        table.revalidate();
+        table.repaint();
+    }
 }

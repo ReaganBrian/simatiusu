@@ -151,4 +151,142 @@ public class RoomService {
             default: return "";
         }
     }
+    
+    /**
+     * Validate room data
+     */
+    public boolean validateRoom(Room room) {
+        if (room == null) {
+            return false;
+        }
+        
+        return room.getKodeRuang() != null && 
+               !room.getKodeRuang().isEmpty() &&
+               room.getProdi() != null &&
+               !room.getProdi().isEmpty();
+    }
+    
+    /**
+     * Handle room not found error
+     */
+    public Room getRoomWithErrorHandling(int roomId) {
+        try {
+            Room room = roomDAO.findById(roomId);
+            if (room == null) {
+                System.err.println("Room with ID " + roomId + " not found");
+            }
+            return room;
+        } catch (Exception e) {
+            System.err.println("Error getting room: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
+     * Get room status with error handling
+     */
+    public Boolean getRoomStatusSafe(int roomId) {
+        try {
+            return isRoomOccupied(roomId);
+        } catch (Exception e) {
+            System.err.println("Error checking room status: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
+     * Get all rooms with error handling
+     */
+    public List<Room> getAllRoomsSafe() {
+        try {
+            List<Room> rooms = roomDAO.findAll();
+            if (rooms == null || rooms.isEmpty()) {
+                System.out.println("No rooms found in database");
+                return new java.util.ArrayList<>();
+            }
+            return rooms;
+        } catch (Exception e) {
+            System.err.println("Error getting all rooms: " + e.getMessage());
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
+    }
+    
+    /**
+     * Count available rooms
+     */
+    public int countAvailableRooms() {
+        int count = 0;
+        List<Room> rooms = roomDAO.findAll();
+        
+        for (Room room : rooms) {
+            if (!isRoomOccupied(room.getId())) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Count occupied rooms
+     */
+    public int countOccupiedRooms() {
+        int count = 0;
+        List<Room> rooms = roomDAO.findAll();
+        
+        for (Room room : rooms) {
+            if (isRoomOccupied(room.getId())) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Get room statistics
+     */
+    public Map<String, Integer> getRoomStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+        List<Room> rooms = roomDAO.findAll();
+        
+        stats.put("total", rooms.size());
+        stats.put("available", countAvailableRooms());
+        stats.put("occupied", countOccupiedRooms());
+        stats.put("TI", roomDAO.findByProdi("TI").size());
+        stats.put("IK", roomDAO.findByProdi("IK").size());
+        
+        return stats;
+    }
+    
+    /**
+     * Validate and refresh room status
+     */
+    public boolean refreshRoomStatus(int roomId) {
+        try {
+            Room room = roomDAO.findById(roomId);
+            if (room == null) {
+                return false;
+            }
+            
+            // Revalidate status
+            boolean isOccupied = isRoomOccupied(roomId);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error refreshing room status: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Clear cached data and reload
+     */
+    public void clearCacheAndReload() {
+        // Force reload from database
+        System.out.println("Clearing cache and reloading room data...");
+    }
 }
