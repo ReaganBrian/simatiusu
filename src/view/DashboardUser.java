@@ -367,4 +367,108 @@ public class DashboardUser extends JFrame {
             new LoginFrame().setVisible(true);
         }
     }
+    
+    /**
+     * Format waktu untuk display
+     */
+    private String formatTimeDisplay(java.sql.Time startTime, java.sql.Time endTime) {
+        if (startTime == null || endTime == null) {
+            return "N/A";
+        }
+        return String.format("%s - %s", 
+            startTime.toString().substring(0, 5),
+            endTime.toString().substring(0, 5));
+    }
+    
+    /**
+     * Cek apakah user dapat melakukan booking
+     */
+    private boolean canUserBook() {
+        if (currentUser == null) {
+            return false;
+        }
+        return !currentUser.isAdmin();
+    }
+    
+    /**
+     * Hitung total ruangan tersedia
+     */
+    private int countAvailableRooms() {
+        int count = 0;
+        List<Room> allRooms = roomService.getAllRooms();
+        Map<Integer, Booking> activeBookings = roomService.getAllActiveBookings();
+        Map<Integer, model.JadwalTetap> activeJadwalTetap = roomService.getAllActiveJadwalTetap();
+        
+        for (Room room : allRooms) {
+            if (activeBookings.get(room.getId()) == null && 
+                activeJadwalTetap.get(room.getId()) == null) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Hitung total ruangan yang sedang dipakai
+     */
+    private int countOccupiedRooms() {
+        int count = 0;
+        List<Room> allRooms = roomService.getAllRooms();
+        Map<Integer, Booking> activeBookings = roomService.getAllActiveBookings();
+        Map<Integer, model.JadwalTetap> activeJadwalTetap = roomService.getAllActiveJadwalTetap();
+        
+        for (Room room : allRooms) {
+            if (activeBookings.get(room.getId()) != null || 
+                activeJadwalTetap.get(room.getId()) != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Get room status text
+     */
+    private String getRoomStatusText(Room room, Booking booking, model.JadwalTetap jadwal) {
+        if (jadwal != null) {
+            return "SEDANG DIPAKAI (Jadwal Tetap)";
+        } else if (booking != null) {
+            return "SEDANG DIPAKAI (Peminjaman)";
+        } else {
+            return "TERSEDIA";
+        }
+    }
+    
+    /**
+     * Validasi room panel sebelum display
+     */
+    private boolean validateRoomData(Room room) {
+        return room != null && 
+               room.getKodeRuang() != null && 
+               !room.getKodeRuang().isEmpty();
+    }
+    
+    /**
+     * Stop semua background task
+     */
+    private void stopBackgroundTasks() {
+        if (refreshTimer != null && refreshTimer.isRunning()) {
+            refreshTimer.stop();
+        }
+    }
+    
+    /**
+     * Resume background task
+     */
+    private void resumeBackgroundTasks() {
+        if (refreshTimer != null && !refreshTimer.isRunning()) {
+            refreshTimer.start();
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        stopBackgroundTasks();
+        super.dispose();
+    }
 }

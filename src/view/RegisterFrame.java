@@ -1,8 +1,8 @@
 package view;
 
-import service.AuthService;
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import service.AuthService;
 
 public class RegisterFrame extends JFrame {
     private AuthService authService;

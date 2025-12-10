@@ -1,10 +1,9 @@
 package view;
 
+import java.awt.*;
+import javax.swing.*;
 import model.User;
 import service.AuthService;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
 
 public class LoginFrame extends JFrame {
     private AuthService authService;
