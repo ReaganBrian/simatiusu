@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/service/AuthService.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/service/BookingService.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/util/DBConnection.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/util/HashUtil.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/DashboardUser.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/DashboardAdmin.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/LoginFrame.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/RegisterFrame.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/BookingForm.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/model/Booking.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/dao/UserDAO.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/dao/JadwalTetapDAO.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/service/RoomService.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/model/JadwalTetap.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/dao/BookingDAO.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/dao/RoomDAO.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/model/User.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/model/Room.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/simatiusu_pbol4/src/view/RiwayatPeminjamanDialog.java</file>
+        </group>
+    </open-files>
+</project-private>
