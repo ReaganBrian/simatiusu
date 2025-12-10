@@ -207,4 +207,158 @@ public class BookingDAO {
         
         return booking;
     }
+    
+    /**
+     * Update status dengan keterangan tambahan
+     */
+    public boolean updateStatusWithReason(int bookingId, String status, String reason) {
+        String sql = "UPDATE bookings SET status = ?, keterangan = ? WHERE id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, status);
+            stmt.setString(2, reason);
+            stmt.setInt(3, bookingId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Find booking by ID
+     */
+    public Booking findById(int bookingId) {
+        String sql = "SELECT b.*, u.nama_lengkap, u.nidn_or_nim, r.kode_ruang " +
+                     "FROM bookings b " +
+                     "JOIN users u ON b.user_id = u.id " +
+                     "JOIN rooms r ON b.room_id = r.id " +
+                     "WHERE b.id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, bookingId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return extractBooking(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Check if booking can be approved (no conflicts)
+     */
+    public boolean canBeApproved(int bookingId) {
+        Booking booking = findById(bookingId);
+        if (booking == null || !booking.isPending()) {
+            return false;
+        }
+        
+        // Check for overlapping approved bookings
+        return !hasOverlappingBooking(
+            booking.getRoomId(),
+            booking.getTanggal(),
+            booking.getJamMulai(),
+            booking.getJamSelesai(),
+            bookingId
+        );
+    }
+    
+    /**
+     * Count bookings by status
+     */
+    public int countByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM bookings WHERE status = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, status);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    /**
+     * Get approved bookings for a specific room and date
+     */
+    public List<Booking> findApprovedBookingsByRoomAndDate(int roomId, Date tanggal) {
+        String sql = "SELECT b.*, u.nama_lengkap, u.nidn_or_nim, r.kode_ruang " +
+                     "FROM bookings b " +
+                     "JOIN users u ON b.user_id = u.id " +
+                     "JOIN rooms r ON b.room_id = r.id " +
+                     "WHERE b.room_id = ? AND b.tanggal = ? AND b.status = 'DISETUJUI' " +
+                     "ORDER BY b.jam_mulai";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, roomId);
+            stmt.setDate(2, tanggal);
+            ResultSet rs = stmt.executeQuery();
+            
+            List<Booking> bookings = new ArrayList<>();
+            while (rs.next()) {
+                bookings.add(extractBooking(rs));
+            }
+            return bookings;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+    
+    /**
+     * Delete booking by ID
+     */
+    public boolean delete(int bookingId) {
+        String sql = "DELETE FROM bookings WHERE id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, bookingId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Validate booking before approval
+     */
+    public boolean validateBookingForApproval(int bookingId) {
+        Booking booking = findById(bookingId);
+        if (booking == null) {
+            return false;
+        }
+        
+        // Check if booking is in pending status
+        if (!booking.isPending()) {
+            return false;
+        }
+        
+        // Check if date is not in the past
+        Date today = new Date(System.currentTimeMillis());
+        if (booking.getTanggal().before(today)) {
+            return false;
+        }
+        
+        return true;
+    }
 }

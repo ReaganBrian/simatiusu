@@ -263,6 +263,168 @@ public class DashboardAdmin extends JFrame {
         }
     }
     
+    /**
+     * Approve booking dengan konfirmasi detail
+     */
+    private boolean approveBookingWithConfirmation(int bookingId, Booking booking) {
+        if (booking == null) {
+            return false;
+        }
+        
+        String message = String.format(
+            "Setujui peminjaman berikut?\n\n" +
+            "Peminjam: %s\n" +
+            "Ruangan: %s\n" +
+            "Mata Kuliah: %s\n" +
+            "Tanggal: %s\n" +
+            "Waktu: %s - %s",
+            booking.getNamaPeminjam(),
+            booking.getKodeRuang(),
+            booking.getMataKuliah(),
+            booking.getTanggal(),
+            booking.getJamMulai(),
+            booking.getJamSelesai()
+        );
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            message,
+            "Konfirmasi Persetujuan",
+            JOptionPane.YES_NO_OPTION);
+        
+        return confirm == JOptionPane.YES_OPTION;
+    }
+    
+    /**
+     * Reject booking dengan alasan
+     */
+    private boolean rejectBookingWithReason(int bookingId, Booking booking) {
+        if (booking == null) {
+            return false;
+        }
+        
+        String reason = JOptionPane.showInputDialog(this,
+            "Masukkan alasan penolakan (opsional):",
+            "Alasan Penolakan",
+            JOptionPane.QUESTION_MESSAGE);
+        
+        if (reason != null) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Validate booking sebelum approval
+     */
+    private boolean validateBeforeApproval(Booking booking) {
+        if (booking == null) {
+            return false;
+        }
+        
+        if (!booking.isPending()) {
+            JOptionPane.showMessageDialog(this,
+                "Peminjaman ini sudah diproses!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Show booking details dialog
+     */
+    private void showBookingDetails(int bookingId) {
+        Booking booking = bookingService.getBookingById(bookingId);
+        if (booking == null) {
+            JOptionPane.showMessageDialog(this,
+                "Data peminjaman tidak ditemukan!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String details = String.format(
+            "Detail Peminjaman\n\n" +
+            "ID: %d\n" +
+            "Peminjam: %s\n" +
+            "NIDN/NIM: %s\n" +
+            "Ruangan: %s\n" +
+            "Mata Kuliah: %s\n" +
+            "Dosen: %s\n" +
+            "Tanggal: %s\n" +
+            "Jam: %s - %s\n" +
+            "Status: %s\n" +
+            "Keterangan: %s\n" +
+            "Dibuat: %s",
+            booking.getId(),
+            booking.getNamaPeminjam(),
+            booking.getNidnOrNim(),
+            booking.getKodeRuang(),
+            booking.getMataKuliah(),
+            booking.getNamaDosen(),
+            booking.getTanggal(),
+            booking.getJamMulai(),
+            booking.getJamSelesai(),
+            booking.getStatus(),
+            booking.getKeterangan() != null ? booking.getKeterangan() : "-",
+            booking.getCreatedAt()
+        );
+        
+        JOptionPane.showMessageDialog(this,
+            details,
+            "Detail Peminjaman",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Batch approve multiple bookings
+     */
+    private void batchApproveBookings(List<Integer> bookingIds) {
+        int successCount = 0;
+        int failCount = 0;
+        
+        for (int bookingId : bookingIds) {
+            boolean success = bookingService.approveBooking(bookingId);
+            if (success) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        }
+        
+        JOptionPane.showMessageDialog(this,
+            String.format("Berhasil: %d\nGagal: %d", successCount, failCount),
+            "Hasil Batch Approval",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        loadData();
+    }
+    
+    /**
+     * Check if admin can approve booking
+     */
+    private boolean canApproveBooking(User admin) {
+        return admin != null && admin.isAdmin();
+    }
+    
+    /**
+     * Log approval activity
+     */
+    private void logApprovalActivity(int bookingId, String action, boolean success) {
+        String logMessage = String.format(
+            "[%s] Admin %s %s booking ID %d - %s",
+            new java.util.Date(),
+            currentUser.getNamaLengkap(),
+            action,
+            bookingId,
+            success ? "SUCCESS" : "FAILED"
+        );
+        System.out.println(logMessage);
+    }
+    
     private void startRealtimeUpdates() {
         // Update every 5 seconds
         refreshTimer = new Timer(5000, e -> loadData());
