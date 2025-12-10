@@ -82,4 +82,52 @@ public class Booking {
     
     public String getKodeRuang() { return kodeRuang; }
     public void setKodeRuang(String kodeRuang) { this.kodeRuang = kodeRuang; }
+    
+    /**
+     * Check if booking is pending
+     */
+    public boolean isPending() {
+        return "MENUNGGU".equals(status) || "PENDING".equals(status);
+    }
+    
+    /**
+     * Check if booking is approved
+     */
+    public boolean isApproved() {
+        return "DISETUJUI".equals(status) || "APPROVED".equals(status);
+    }
+    
+    /**
+     * Check if booking is rejected
+     */
+    public boolean isRejected() {
+        return "DITOLAK".equals(status) || "REJECTED".equals(status);
+    }
+    
+    /**
+     * Get duration in minutes
+     */
+    public int getDurationInMinutes() {
+        if (jamMulai == null || jamSelesai == null) {
+            return 0;
+        }
+        
+        long diff = jamSelesai.getTime() - jamMulai.getTime();
+        return (int) (diff / (1000 * 60));
+    }
+    
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", roomId=" + roomId +
+                ", namaDosen='" + namaDosen + '\'' +
+                ", mataKuliah='" + mataKuliah + '\'' +
+                ", tanggal=" + tanggal +
+                ", jamMulai=" + jamMulai +
+                ", jamSelesai=" + jamSelesai +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

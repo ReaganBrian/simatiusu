@@ -301,4 +301,94 @@ public class BookingForm extends JDialog {
             ex.printStackTrace();
         }
     }
+    
+    /**
+     * Clear form fields
+     */
+    private void clearForm() {
+        txtNamaDosen.setText("");
+        txtMataKuliah.setText("");
+        txtKeterangan.setText("");
+        spinnerTanggal.setValue(new java.util.Date());
+        spinnerJamMulai.setValue(8);
+        spinnerMenitMulai.setValue(0);
+        spinnerJamSelesai.setValue(9);
+        spinnerMenitSelesai.setValue(0);
+    }
+    
+    /**
+     * Validate form inputs
+     */
+    private boolean validateInputs() {
+        if (txtNamaDosen.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Nama dosen harus diisi!",
+                "Validasi Error",
+                JOptionPane.WARNING_MESSAGE);
+            txtNamaDosen.requestFocus();
+            return false;
+        }
+        
+        if (txtMataKuliah.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Mata kuliah harus diisi!",
+                "Validasi Error",
+                JOptionPane.WARNING_MESSAGE);
+            txtMataKuliah.requestFocus();
+            return false;
+        }
+        
+        int startHour = (Integer) spinnerJamMulai.getValue();
+        int startMinute = (Integer) spinnerMenitMulai.getValue();
+        int endHour = (Integer) spinnerJamSelesai.getValue();
+        int endMinute = (Integer) spinnerMenitSelesai.getValue();
+        
+        if (endHour < startHour || (endHour == startHour && endMinute <= startMinute)) {
+            JOptionPane.showMessageDialog(this,
+                "Jam selesai harus lebih dari jam mulai!",
+                "Validasi Error",
+                JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Format time display
+     */
+    private String formatTime(int hour, int minute) {
+        return String.format("%02d:%02d", hour, minute);
+    }
+    
+    /**
+     * Check if date is weekend
+     */
+    private boolean isWeekend(java.util.Date date) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(date);
+        int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
+        return dayOfWeek == java.util.Calendar.SATURDAY || dayOfWeek == java.util.Calendar.SUNDAY;
+    }
+    
+    /**
+     * Get booking summary text
+     */
+    private String getBookingSummary() {
+        String namaDosen = txtNamaDosen.getText().trim();
+        String mataKuliah = txtMataKuliah.getText().trim();
+        java.util.Date tanggal = (java.util.Date) spinnerTanggal.getValue();
+        int startHour = (Integer) spinnerJamMulai.getValue();
+        int startMinute = (Integer) spinnerMenitMulai.getValue();
+        int endHour = (Integer) spinnerJamSelesai.getValue();
+        int endMinute = (Integer) spinnerMenitSelesai.getValue();
+        
+        return String.format("Ruangan: %s\nDosen: %s\nMata Kuliah: %s\nTanggal: %tF\nWaktu: %s - %s",
+            selectedRoom.getKodeRuang(),
+            namaDosen,
+            mataKuliah,
+            tanggal,
+            formatTime(startHour, startMinute),
+            formatTime(endHour, endMinute));
+    }
 }

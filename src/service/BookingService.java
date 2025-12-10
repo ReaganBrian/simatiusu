@@ -129,4 +129,96 @@ public class BookingService {
             default: return "";
         }
     }
+    
+    /**
+     * Validate booking time
+     */
+    public boolean isValidBookingTime(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return false;
+        }
+        
+        LocalTime start = jamMulai.toLocalTime();
+        LocalTime end = jamSelesai.toLocalTime();
+        
+        // Check if end time is after start time
+        if (end.isBefore(start) || end.equals(start)) {
+            return false;
+        }
+        
+        // Check if within operational hours (08:00 - 17:00)
+        LocalTime operationStart = LocalTime.of(8, 0);
+        LocalTime operationEnd = LocalTime.of(17, 0);
+        
+        return !start.isBefore(operationStart) && !end.isAfter(operationEnd);
+    }
+    
+    /**
+     * Check if booking date is valid (not in the past)
+     */
+    public boolean isValidBookingDate(Date tanggal) {
+        if (tanggal == null) {
+            return false;
+        }
+        
+        LocalDate bookingDate = tanggal.toLocalDate();
+        LocalDate today = LocalDate.now();
+        
+        return !bookingDate.isBefore(today);
+    }
+    
+    /**
+     * Calculate booking duration in hours
+     */
+    public double calculateDuration(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return 0.0;
+        }
+        
+        long diff = jamSelesai.getTime() - jamMulai.getTime();
+        return diff / (1000.0 * 60 * 60);
+    }
+    
+    /**
+     * Get booking by ID
+     */
+    public Booking getBookingById(int bookingId) {
+        List<Booking> allBookings = bookingDAO.findAllBookingsWithDetails();
+        for (Booking b : allBookings) {
+            if (b.getId() == bookingId) {
+                return b;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Count total bookings by status
+     */
+    public int countBookingsByStatus(String status) {
+        List<Booking> allBookings = bookingDAO.findAllBookingsWithDetails();
+        int count = 0;
+        for (Booking b : allBookings) {
+            if (status.equals(b.getStatus())) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Check if room is available for booking
+     */
+    public boolean isRoomAvailable(int roomId, Date tanggal, Time jamMulai, Time jamSelesai) {
+        LocalDate localDate = tanggal.toLocalDate();
+        String hariIndonesia = getDayNameIndonesia(localDate.getDayOfWeek());
+        
+        // Check jadwal tetap
+        if (jadwalTetapDAO.hasOverlappingSchedule(roomId, hariIndonesia, jamMulai, jamSelesai)) {
+            return false;
+        }
+        
+        // Check existing bookings
+        return !bookingDAO.hasOverlappingBooking(roomId, tanggal, jamMulai, jamSelesai, null);
+    }
 }
