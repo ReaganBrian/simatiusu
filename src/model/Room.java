@@ -22,4 +22,40 @@ public class Room {
     
     public String getProdi() { return prodi; }
     public void setProdi(String prodi) { this.prodi = prodi; }
+    
+    /**
+     * Check if room belongs to TI
+     */
+    public boolean isTI() {
+        return "TI".equals(prodi);
+    }
+    
+    /**
+     * Check if room belongs to IK
+     */
+    public boolean isIK() {
+        return "IK".equals(prodi);
+    }
+    
+    @Override
+    public String toString() {
+        return "Room{" +
+                "id=" + id +
+                ", kodeRuang='" + kodeRuang + '\'' +
+                ", prodi='" + prodi + '\'' +
+                '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+        return id == room.id;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
 }

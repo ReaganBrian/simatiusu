@@ -221,4 +221,183 @@ public class BookingService {
         // Check existing bookings
         return !bookingDAO.hasOverlappingBooking(roomId, tanggal, jamMulai, jamSelesai, null);
     }
+    
+    /**
+     * Validate minimum booking duration (minimal 1 jam)
+     */
+    public boolean isValidMinimumDuration(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return false;
+        }
+        
+        double duration = calculateDuration(jamMulai, jamSelesai);
+        return duration >= 1.0; // Minimal 1 jam
+    }
+    
+    /**
+     * Validate maximum booking duration (maksimal 4 jam)
+     */
+    public boolean isValidMaximumDuration(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return false;
+        }
+        
+        double duration = calculateDuration(jamMulai, jamSelesai);
+        return duration <= 4.0; // Maksimal 4 jam
+    }
+    
+    /**
+     * Check if booking time is within allowed hours (08:00 - 17:00)
+     */
+    public boolean isWithinOperationalHours(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return false;
+        }
+        
+        LocalTime start = jamMulai.toLocalTime();
+        LocalTime end = jamSelesai.toLocalTime();
+        LocalTime operationStart = LocalTime.of(8, 0);
+        LocalTime operationEnd = LocalTime.of(17, 0);
+        
+        return !start.isBefore(operationStart) && !end.isAfter(operationEnd);
+    }
+    
+    /**
+     * Check if booking is made in advance (minimal 1 hari sebelumnya)
+     */
+    public boolean isValidAdvanceBooking(Date tanggal) {
+        if (tanggal == null) {
+            return false;
+        }
+        
+        LocalDate bookingDate = tanggal.toLocalDate();
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        
+        // Minimal booking untuk besok
+        return !bookingDate.isBefore(tomorrow);
+    }
+    
+    /**
+     * Check if booking is within maximum advance period (maksimal 30 hari ke depan)
+     */
+    public boolean isWithinMaxAdvancePeriod(Date tanggal) {
+        if (tanggal == null) {
+            return false;
+        }
+        
+        LocalDate bookingDate = tanggal.toLocalDate();
+        LocalDate today = LocalDate.now();
+        LocalDate maxDate = today.plusDays(30);
+        
+        return !bookingDate.isAfter(maxDate);
+    }
+    
+    /**
+     * Validate if time is in 30-minute intervals
+     */
+    public boolean isValidTimeInterval(Time time) {
+        if (time == null) {
+            return false;
+        }
+        
+        LocalTime localTime = time.toLocalTime();
+        int minute = localTime.getMinute();
+        
+        // Only allow 00 or 30 minutes
+        return minute == 0 || minute == 30;
+    }
+    
+    /**
+     * Check if booking conflicts with lunch break (12:00 - 13:00)
+     */
+    public boolean hasLunchBreakConflict(Time jamMulai, Time jamSelesai) {
+        if (jamMulai == null || jamSelesai == null) {
+            return false;
+        }
+        
+        LocalTime start = jamMulai.toLocalTime();
+        LocalTime end = jamSelesai.toLocalTime();
+        LocalTime lunchStart = LocalTime.of(12, 0);
+        LocalTime lunchEnd = LocalTime.of(13, 0);
+        
+        // Check if booking overlaps with lunch break
+        return (start.isBefore(lunchEnd) && end.isAfter(lunchStart));
+    }
+    
+    /**
+     * Get recommended booking time slots
+     */
+    public List<String> getRecommendedTimeSlots() {
+        List<String> slots = new java.util.ArrayList<>();
+        slots.add("08:00 - 10:00");
+        slots.add("10:00 - 12:00");
+        slots.add("13:00 - 15:00");
+        slots.add("15:00 - 17:00");
+        return slots;
+    }
+    
+    /**
+     * Calculate remaining available hours for a date
+     */
+    public int calculateRemainingHours(int roomId, Date tanggal) {
+        // Total operational hours per day (08:00 - 17:00 = 9 hours)
+        // Minus lunch break (1 hour) = 8 hours
+        int totalHours = 8;
+        
+        List<Booking> bookings = bookingDAO.findApprovedBookingsByRoomAndDate(roomId, tanggal);
+        int bookedHours = 0;
+        
+        for (Booking b : bookings) {
+            bookedHours += (int) calculateDuration(b.getJamMulai(), b.getJamSelesai());
+        }
+        
+        return totalHours - bookedHours;
+    }
+    
+    /**
+     * Check if weekend booking is allowed
+     */
+    public boolean isWeekendBookingAllowed(Date tanggal) {
+        if (tanggal == null) {
+            return false;
+        }
+        
+        LocalDate localDate = tanggal.toLocalDate();
+        DayOfWeek dayOfWeek = localDate.getDayOfWeek();
+        
+        // Weekend booking not allowed by default
+        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+    }
+    
+    /**
+     * Validate complete booking time constraints
+     */
+    public String validateBookingTimeConstraints(Time jamMulai, Time jamSelesai, Date tanggal) {
+        if (!isValidBookingTime(jamMulai, jamSelesai)) {
+            return "Waktu peminjaman tidak valid";
+        }
+        
+        if (!isValidMinimumDuration(jamMulai, jamSelesai)) {
+            return "Durasi peminjaman minimal 1 jam";
+        }
+        
+        if (!isValidMaximumDuration(jamMulai, jamSelesai)) {
+            return "Durasi peminjaman maksimal 4 jam";
+        }
+        
+        if (!isWithinOperationalHours(jamMulai, jamSelesai)) {
+            return "Waktu peminjaman harus antara 08:00 - 17:00";
+        }
+        
+        if (!isValidTimeInterval(jamMulai) || !isValidTimeInterval(jamSelesai)) {
+            return "Waktu harus dalam interval 30 menit (contoh: 08:00, 08:30)";
+        }
+        
+        if (!isWeekendBookingAllowed(tanggal)) {
+            return "Peminjaman tidak diperbolehkan pada akhir pekan";
+        }
+        
+        return null; // No errors
+    }
 }
