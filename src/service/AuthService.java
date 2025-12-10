@@ -90,4 +90,19 @@ public class AuthService {
             throw new IllegalArgumentException("Password dan konfirmasi tidak sama");
         }
     }
+    
+    /**
+     * Logout user - clear session if needed
+     */
+    public void logout(User user) {
+        // Log logout activity
+        System.out.println("User logged out: " + user.getEmail());
+    }
+    
+    /**
+     * Get user information by email
+     */
+    public User getUserInfo(String email) {
+        return userDAO.findByEmailOrNidnOrNim(email);
+    }
 }

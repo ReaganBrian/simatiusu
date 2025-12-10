@@ -49,4 +49,20 @@ public class User {
     public boolean isAdmin() {
         return "ADMIN".equals(role);
     }
+    
+    public boolean isUser() {
+        return "USER".equals(role);
+    }
+    
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", namaLengkap='" + namaLengkap + '\'' +
+                ", nidnOrNim='" + nidnOrNim + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

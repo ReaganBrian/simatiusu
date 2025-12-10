@@ -169,6 +169,37 @@ public class LoginFrame extends JFrame {
         dispose();
     }
     
+    private void clearForm() {
+        txtIdentifier.setText("");
+        txtPassword.setText("");
+        txtIdentifier.requestFocus();
+    }
+    
+    private boolean validateInput() {
+        String identifier = txtIdentifier.getText().trim();
+        String password = new String(txtPassword.getPassword());
+        
+        if (identifier.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Email/NIDN/NIM harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtIdentifier.requestFocus();
+            return false;
+        }
+        
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Password harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtPassword.requestFocus();
+            return false;
+        }
+        
+        return true;
+    }
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {

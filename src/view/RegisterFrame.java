@@ -215,4 +215,64 @@ public class RegisterFrame extends JFrame {
         new LoginFrame().setVisible(true);
         dispose();
     }
+    
+    private void clearForm() {
+        txtNamaLengkap.setText("");
+        txtNidnOrNim.setText("");
+        txtEmail.setText("");
+        txtPassword.setText("");
+        txtConfirmPassword.setText("");
+        txtNamaLengkap.requestFocus();
+    }
+    
+    private boolean validateFields() {
+        if (txtNamaLengkap.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Nama lengkap harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtNamaLengkap.requestFocus();
+            return false;
+        }
+        
+        if (txtNidnOrNim.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "NIDN/NIM harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtNidnOrNim.requestFocus();
+            return false;
+        }
+        
+        if (txtEmail.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Email harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtEmail.requestFocus();
+            return false;
+        }
+        
+        String password = new String(txtPassword.getPassword());
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Password harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtPassword.requestFocus();
+            return false;
+        }
+        
+        String confirmPassword = new String(txtConfirmPassword.getPassword());
+        if (confirmPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Konfirmasi password harus diisi!", 
+                "Validasi Error", 
+                JOptionPane.WARNING_MESSAGE);
+            txtConfirmPassword.requestFocus();
+            return false;
+        }
+        
+        return true;
+    }
 }
